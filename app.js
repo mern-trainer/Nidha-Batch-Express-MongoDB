@@ -4,8 +4,11 @@ const express = require("express")
 
 const todoRouter = require("./Routes/todo.route")
 const userRouter = require("./Routes/user.route")
+const config = require("./Config/db")
 
 const app = express()
+
+config.connectDB()
 
 app.use(express.json())
 

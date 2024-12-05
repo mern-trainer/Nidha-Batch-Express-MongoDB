@@ -7,6 +7,7 @@
 
 const bcrypt = require("bcrypt")
 const { v4: getUserId } = require("uuid")
+const db = require("../Config/db")
 
 let userList = []
 
@@ -22,6 +23,7 @@ const createUser = async (request, response) => {
         userInfo.id = getUserId()
         userInfo.password = await bcrypt.hash(userInfo.password, 10)
         userList.push(userInfo)
+
         return response.status(201).send({
             message: "user created",
             userInfo
