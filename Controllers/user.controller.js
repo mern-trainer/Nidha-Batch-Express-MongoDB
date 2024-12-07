@@ -1,32 +1,30 @@
-// bcrypt => package
-
-// encrypt <==> decrypt
-// hash => bcrypt
-
-// hellosndflwejrliwjer => salt
-
 const bcrypt = require("bcrypt")
 const { v4: getUserId } = require("uuid")
 const db = require("../Config/db")
+const User = require("../Models/user.model")
 
 let userList = []
 
 const createUser = async (request, response) => {
     try {
         const userInfo = request.body
-        const userIndex = userList.findIndex(user => user.username.toLowerCase() === userInfo.username.toLowerCase())
-        if (userIndex > -1) {
+        const userNameExist = await User.findOne({ username: userInfo.username });
+        if (userNameExist) {
             return response.status(409).send({
                 message: "username already exist"
             })
         }
-        userInfo.id = getUserId()
+        const emailExist = await User.findOne({ email: userInfo.email });
+        if (emailExist) {
+            return response.status(409).send({
+                message: "email already exist"
+            })
+        }
         userInfo.password = await bcrypt.hash(userInfo.password, 10)
-        userList.push(userInfo)
-
+        const res = await User.create(userInfo)
         return response.status(201).send({
             message: "user created",
-            userInfo
+            res
         })
     } catch (err) {
         console.log(err)
