@@ -1,7 +1,9 @@
 const bcrypt = require("bcrypt")
-const { v4: getUserId } = require("uuid")
-const db = require("../Config/db")
 const User = require("../Models/user.model")
+const jwt = require("jsonwebtoken")
+require("dotenv").config()
+
+// token create
 
 let userList = []
 
@@ -22,14 +24,22 @@ const createUser = async (request, response) => {
         }
         userInfo.password = await bcrypt.hash(userInfo.password, 10)
         const res = await User.create(userInfo)
+        if (!res._id) {
+            return response.status(500).send({ message: "Error happend" });
+        }
+        res.password = null
+        const token = jwt.sign({ sub: res }, process.env.JWT_KEY, {
+            expiresIn: "3d"
+        })
         return response.status(201).send({
             message: "user created",
-            res
+            res,
+            token
         })
     } catch (err) {
         console.log(err)
         return response.status(500).send({
-            message: "Internal server error"
+            message: err
         })
     }
 }
